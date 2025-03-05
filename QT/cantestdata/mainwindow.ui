@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1205</width>
+    <width>1208</width>
     <height>600</height>
    </rect>
   </property>
@@ -70,15 +70,15 @@
 background-color: rgb(170, 255, 255);</string>
      </property>
      <property name="title">
-      <string>DIEU KHIEN</string>
+      <string>ĐIỀU KHIỂN </string>
      </property>
      <widget class="QPushButton" name="pushButton_RUN">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>120</y>
+        <y>70</y>
         <width>111</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="font">
@@ -98,10 +98,10 @@ background-color: rgb(85, 255, 127);</string>
      <widget class="QLabel" name="label_DK">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>40</y>
-        <width>161</width>
-        <height>41</height>
+        <x>60</x>
+        <y>30</y>
+        <width>151</width>
+        <height>31</height>
        </rect>
       </property>
       <property name="font">
@@ -122,9 +122,9 @@ background-color: rgb(255, 255, 127);</string>
       <property name="geometry">
        <rect>
         <x>140</x>
-        <y>120</y>
+        <y>70</y>
         <width>111</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="font">
@@ -139,6 +139,105 @@ color: rgb(0, 0, 0);</string>
       </property>
       <property name="text">
        <string>STOP</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_STOP_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>160</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-color: rgb(255, 0, 0);
+selection-background-color: rgb(255, 255, 255);
+border-top-color: rgb(255, 85, 127);
+alternate-background-color: rgb(85, 85, 0);
+background-color: rgb(255, 170, 0);
+color: rgb(255, 0, 0);
+gridline-color: rgb(255, 0, 0);
+selection-color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>ANGLE</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>110</y>
+        <width>113</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 127);</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>120</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>SETPOINT:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_STOP_3">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>160</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-color: rgb(255, 0, 0);
+selection-background-color: rgb(255, 255, 255);
+border-top-color: rgb(255, 85, 127);
+alternate-background-color: rgb(85, 85, 0);
+background-color: rgb(255, 170, 0);
+color: rgb(255, 0, 0);
+gridline-color: rgb(255, 0, 0);
+selection-color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>SPEED</string>
       </property>
      </widget>
     </widget>
@@ -161,18 +260,50 @@ color: rgb(0, 0, 0);</string>
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(255, 255, 255);
+      <string notr="true">
 background-color: rgb(170, 255, 255);</string>
      </property>
      <property name="title">
-      <string>THIET LAP</string>
+      <string>DỮ LIỆU THỰC TẾ</string>
      </property>
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>40</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>16</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 127);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
         <x>20</x>
         <y>50</y>
-        <width>91</width>
+        <width>111</width>
         <height>16</height>
        </rect>
       </property>
@@ -186,16 +317,16 @@ background-color: rgb(170, 255, 255);</string>
        <string notr="true">color: rgb(255, 0, 0);</string>
       </property>
       <property name="text">
-       <string>SETPOINT:</string>
+       <string>REAL SPEED:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_STOP_2">
+     <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>80</x>
-        <y>120</y>
+        <x>140</x>
+        <y>100</y>
         <width>111</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="font">
@@ -204,37 +335,43 @@ background-color: rgb(170, 255, 255);</string>
         <bold>true</bold>
        </font>
       </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <property name="styleSheet">
-       <string notr="true">border-color: rgb(255, 0, 0);
-selection-background-color: rgb(255, 255, 255);
-border-top-color: rgb(255, 85, 127);
-alternate-background-color: rgb(85, 85, 0);
-background-color: rgb(255, 170, 0);
-color: rgb(255, 0, 0);
-gridline-color: rgb(255, 0, 0);
-selection-color: rgb(255, 0, 0);</string>
+       <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 127);</string>
       </property>
       <property name="text">
-       <string>OK</string>
+       <string/>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEdit">
+     <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>40</y>
-        <width>113</width>
-        <height>41</height>
+        <x>20</x>
+        <y>110</y>
+        <width>111</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <pointsize>16</pointsize>
+        <pointsize>13</pointsize>
         <bold>true</bold>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(255, 255, 127);</string>
+       <string notr="true">color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>REAL ANGLE:</string>
       </property>
      </widget>
     </widget>
@@ -258,19 +395,124 @@ selection-color: rgb(255, 0, 0);</string>
 background-color: rgb(170, 255, 255);</string>
      </property>
      <property name="title">
-      <string>DU LIEU GUI</string>
+      <string>DỮ LIỆU GỬI</string>
      </property>
-     <widget class="QTextBrowser" name="textBrowser_2">
+     <widget class="QTextBrowser" name="textBrowser_sent">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>20</y>
         <width>241</width>
-        <height>171</height>
+        <height>101</height>
        </rect>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_CAN_Data">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>160</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 127);</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_Send">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>200</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SEND</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_CAN_ID">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>130</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 127);</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>140</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>ID</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>170</y>
+        <width>51</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 0, 0);</string>
+      </property>
+      <property name="text">
+       <string>DATA</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBox_DLC">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>201</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
       </property>
      </widget>
     </widget>
@@ -294,7 +536,7 @@ background-color: rgb(170, 255, 255);</string>
 background-color: rgb(170, 255, 255);</string>
      </property>
      <property name="title">
-      <string>DU LIEU NHAN </string>
+      <string>DỮ LIỆU NHẬN</string>
      </property>
      <widget class="QTextBrowser" name="textBrowser">
       <property name="geometry">
@@ -302,7 +544,7 @@ background-color: rgb(170, 255, 255);</string>
         <x>10</x>
         <y>20</y>
         <width>241</width>
-        <height>171</height>
+        <height>101</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -372,6 +614,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <height>481</height>
        </rect>
       </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
       <property name="styleSheet">
        <string notr="true">background-color: rgb(255, 255, 255);</string>
       </property>
@@ -389,7 +634,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1205</width>
+     <width>1208</width>
      <height>22</height>
     </rect>
    </property>

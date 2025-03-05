@@ -72,7 +72,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-  while (1)
+   while (1)
   {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
@@ -199,7 +199,7 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles CAN1 RX0 interrupts.
+  * @brief This function handles CAN1 RX0 interrupt.
   */
 void CAN1_RX0_IRQHandler(void)
 {

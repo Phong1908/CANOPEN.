@@ -41,6 +41,8 @@ public:
     QTextBrowser *textBrowser_2;
     QGroupBox *groupBox_5;
     QTextBrowser *textBrowser;
+    QPushButton *pushButton_readData;
+    QPushButton *pushButton_clear;
     QTabWidget *tabWidget;
     QWidget *tab;
     QWidget *customPlotWidget;
@@ -131,7 +133,7 @@ public:
         lineEdit->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 127);"));
         groupBox_6 = new QGroupBox(groupBox);
         groupBox_6->setObjectName("groupBox_6");
-        groupBox_6->setGeometry(QRect(270, 100, 261, 201));
+        groupBox_6->setGeometry(QRect(270, 70, 261, 231));
         groupBox_6->setFont(font1);
         groupBox_6->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);\n"
 "background-color: rgb(170, 255, 255);"));
@@ -141,7 +143,7 @@ public:
         textBrowser_2->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);"));
         groupBox_5 = new QGroupBox(groupBox);
         groupBox_5->setObjectName("groupBox_5");
-        groupBox_5->setGeometry(QRect(10, 100, 261, 201));
+        groupBox_5->setGeometry(QRect(10, 70, 261, 231));
         groupBox_5->setFont(font1);
         groupBox_5->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);\n"
 "background-color: rgb(170, 255, 255);"));
@@ -149,6 +151,12 @@ public:
         textBrowser->setObjectName("textBrowser");
         textBrowser->setGeometry(QRect(10, 20, 241, 171));
         textBrowser->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);"));
+        pushButton_readData = new QPushButton(groupBox_5);
+        pushButton_readData->setObjectName("pushButton_readData");
+        pushButton_readData->setGeometry(QRect(10, 200, 75, 24));
+        pushButton_clear = new QPushButton(groupBox_5);
+        pushButton_clear->setObjectName("pushButton_clear");
+        pushButton_clear->setGeometry(QRect(170, 200, 75, 24));
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
         tabWidget->setGeometry(QRect(560, 20, 631, 531));
@@ -200,6 +208,8 @@ public:
 "li.checked::marker { content: \"\\2612\"; }\n"
 "</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", nullptr));
+        pushButton_readData->setText(QCoreApplication::translate("MainWindow", "Read Data", nullptr));
+        pushButton_clear->setText(QCoreApplication::translate("MainWindow", "Clear", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("MainWindow", "Tab 1", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Tab 2", nullptr));
     } // retranslateUi

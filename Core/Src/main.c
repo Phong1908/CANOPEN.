@@ -18,11 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stdlib.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,7 +53,6 @@ static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -83,11 +81,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	if (hcan->Instance == CAN1)  // Kiểm tra đúng CAN1
+	{
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
 	if(RxHeader.DLC == 8)
 	{
 		datacheck = 1;
 	}
+}
 }
 /* USER CODE END 0 */
 
@@ -97,6 +98,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -121,15 +123,13 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
-HAL_CAN_Start(&hcan1);
-//Thongbao
-HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
-TxHeader.DLC = 8;
-TxHeader.IDE = CAN_ID_STD;
-TxHeader.RTR = CAN_RTR_DATA;
-TxHeader.StdId = 0x446;
-
-
+  HAL_CAN_Start(&hcan1);
+  //Thongbao
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+  TxHeader.DLC = 8;
+  TxHeader.IDE = CAN_ID_STD;
+  TxHeader.RTR = CAN_RTR_DATA;
+  TxHeader.StdId = 0x446;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -140,21 +140,22 @@ TxHeader.StdId = 0x446;
 
     /* USER CODE BEGIN 3 */
 	  if (sendDataFlag)
-	      {
-	        HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
-	        HAL_Delay(100);  // Gửi mỗi 1 giây
-	      }
-	  if (datacheck)
-	  {
-		 //blink led
-		  for (int i=0; i<RxData[1]; i++)
-		  {
-			  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
-			  HAL_Delay(RxData[0]);
-		  }
-		  datacheck = 0;
-	  }
-  }
+	  	      {
+	  	        HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
+	  	        HAL_Delay(5000);  // Gửi mỗi 1 giây
+	  	      }
+	  	  if (datacheck)
+	  	  {
+	  		 //blink led
+	  		  for (int i=0; i<RxData[1]; i++)
+	  		  {
+	  			  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	  			  HAL_Delay(RxData[0]);
+	  		  }
+	  		  datacheck = 0;
+	  	  }
+	    }
+
   /* USER CODE END 3 */
 }
 
@@ -182,7 +183,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 4;
   RCC_OscInitStruct.PLL.PLLN = 180;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -242,20 +244,20 @@ static void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-CAN_FilterTypeDef canfilterconfig;
+  CAN_FilterTypeDef canfilterconfig;
 
-canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-canfilterconfig.FilterBank = 10;
-canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-canfilterconfig.FilterIdHigh = 0x103<<5;
-canfilterconfig.FilterIdLow = 0;
-canfilterconfig.FilterMaskIdHigh = 0x103<<5;
-canfilterconfig.FilterMaskIdLow = 0x0000;
-canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-canfilterconfig.SlaveStartFilterBank = 20;
+  canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+  canfilterconfig.FilterBank = 10;
+  canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  canfilterconfig.FilterIdHigh = 0x103<<5;
+  canfilterconfig.FilterIdLow = 0;
+  canfilterconfig.FilterMaskIdHigh = 0x103<<5;
+  canfilterconfig.FilterMaskIdLow = 0x0000;
+  canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  canfilterconfig.SlaveStartFilterBank = 20;
 
-HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
+  HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -274,11 +276,10 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
@@ -286,12 +287,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

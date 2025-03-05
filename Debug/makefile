@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (11.3.rel1)
+# Toolchain: GNU Tools for STM32 (12.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := f429_usbcan
+BUILD_ARTIFACT_NAME := canf446re
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-f429_usbcan.elf \
+canf446re.elf \
 
 MAP_FILES += \
-f429_usbcan.map \
+canf446re.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-f429_usbcan.list \
+canf446re.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: f429_usbcan.elf secondary-outputs
+main-build: canf446re.elf secondary-outputs
 
 # Tool invocations
-f429_usbcan.elf f429_usbcan.map: $(OBJS) $(USER_OBJS) C:\Users\LENOVO\OneDrive\ -\ The\ University\ of\ Technology\Desktop\C+\ IOT\f429_usbcan\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "f429_usbcan.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\LENOVO\OneDrive - The University of Technology\Desktop\C+ IOT\f429_usbcan\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="f429_usbcan.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+canf446re.elf canf446re.map: $(OBJS) $(USER_OBJS) D:\CANOPEN-PT\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "canf446re.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\CANOPEN-PT\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="canf446re.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-f429_usbcan.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "f429_usbcan.list"
+canf446re.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "canf446re.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout f429_usbcan.elf f429_usbcan.list f429_usbcan.map
+	-$(RM) canf446re.elf canf446re.list canf446re.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

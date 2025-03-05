@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += core gui serialbus
 QT       += printsupport
 QT       += serialbus
 QT       += core gui serialport
