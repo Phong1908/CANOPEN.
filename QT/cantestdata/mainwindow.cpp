@@ -8,6 +8,7 @@
 #include <QCanBusDevice>
 #include <QCanBusFrame>
 #include <QDebug>
+#include <QMap>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -21,7 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Tạo đối tượng Serial
     Serial = new QSerialPort(this);
     // Kết nối tín hiệu với slot xử lý
-    connect(ui->pushButton_Send, &QPushButton::clicked, this, &MainWindow::sendCanFrame);
+
+    connect(ui->pushButton_Send, &QPushButton::clicked, this, &MainWindow::sendCanData);
+
 
 
     // Cài đặt cổng COM
@@ -85,6 +88,11 @@ void MainWindow::readCanData()
     updateTextBrowser(receivedData);
 
     qDebug() << "Received Data: " << receivedData;
+    // updateTextBrowser(data);
+
+    // // Hiển thị dữ liệu thô trong qDebug
+    // qDebug() << "Received Raw Data: " << data;
+    parseCanData(data);
 }
 
 void MainWindow::updateTextBrowser(const QString &data)
@@ -120,296 +128,189 @@ void MainWindow::on_pushButton_clear_clicked()
     qDebug() << "TextBrowser cleared!";
 }
 
-///gửi dữ liệu
-void MainWindow::sendCanFrame()
+///gửi dữ liệu qua cổng com
+void MainWindow::sendCanData()
 {
-    if (!Serial->isOpen()) {
-        QMessageBox::warning(this, "Error", "Open serial port first!");
+
+
+    QString idHex = ui->lineEdit_CAN_ID->text();     // Lấy ID từ QLineEdit
+    QString dataHex = ui->lineEdit_CAN_Data->text(); // Lấy Data từ QLineEdit
+
+    QByteArray idData = hexStringToByteArray(idHex);  // Chuyển ID sang QByteArray
+    QByteArray frameData = hexStringToByteArray(dataHex); // Chuyển Data sang QByteArray
+
+    if (idData.size() != 4 || frameData.size() != 8) // Kiểm tra đúng kích thước
+    {
+        qDebug() << "Loi: ID phai có 4 byte và Data phai có 8 byte!";
         return;
     }
 
-    // Lấy dữ liệu từ UI
-    bool ok;
-    quint32 canId = ui->lineEdit_CAN_ID->text().toUInt(&ok, 16);
-    quint8 dlc = static_cast<quint8>(ui->spinBox_DLC->value());
-    QByteArray data = QByteArray::fromHex(ui->lineEdit_CAN_Data->text().toLatin1());
-
-    // Kiểm tra dữ liệu hợp lệ
-    if (!ok || data.size() != dlc) {
-        QMessageBox::warning(this, "Error", "Invalid CAN parameters!");
-        return;
-    }
-
-    // Tạo khung CAN
     QByteArray frame;
-    // Thêm byte Header (ví dụ 0xAA để báo hiệu bắt đầu CAN frame)
-    frame.append(0xAA);
-    frame.append(static_cast<char>((canId >> 24) & 0xFF));
-    frame.append(static_cast<char>((canId >> 16) & 0xFF));
-    frame.append(static_cast<char>((canId >> 8) & 0xFF));
-    frame.append(static_cast<char>(canId & 0xFF));
-    frame.append(static_cast<char>(dlc));
-    frame.append(data);
-    // Thêm checksum (tổng XOR của tất cả byte trước đó)
-    char checksum = 0;
-    for (char byte : frame) {
-        checksum ^= byte;
+    frame.append((char)0xAA); // Start Mark 1
+    frame.append((char)0xAA); // Start Mark 2
+    frame.append(idData); // Thêm 4 byte ID vào Frame
+    frame.append(frameData); // Thêm 8 byte Data vào Frame
+
+    // **Thêm các trường bổ sung**
+    frame.append((char)0x08); // Frame Data Length = 8 byte
+    frame.append((char)0x00); // Message Type = 0x00 (CAN Message)
+    frame.append((char)0x00); // CAN Frame Type = 0x01 (Extended)
+    frame.append((char)0x00); // CAN Request Type = 0x01 (Remote Request Frame)
+
+    // **Tính toán CRC**
+    QByteArray crcData = idData + frameData;
+    crcData.append((char)0x08); // Thêm Frame Data Length vào CRC
+    crcData.append((char)0x00); // Thêm Message Type vào CRC
+    crcData.append((char)0x00); // Thêm CAN Frame Type vào CRC
+    crcData.append((char)0x00); // Thêm CAN Request Type vào CRC
+
+    QByteArray processedData;
+    for (char byte : crcData)
+    {
+        if (byte == (char)0xA5 || byte == (char)0xAA || byte == (char)0x55)
+        {
+            processedData.append((char)0xA5); // Thêm FrameCtrl nếu gặp ký tự đặc biệt
+        }
+        processedData.append(byte);
     }
-    frame.append(checksum);
 
-    // Gửi qua Serial
-    Serial->write("hello");
-    // Hiển thị dữ liệu gửi vào textBrowser_sent
-    updateTextBrowser1(canId, dlc, data);
-    qDebug() << "Sent CAN Frame:" << frame.toHex(' ');
+    uchar crc = 0;
+    for (char byte : processedData)
+    {
+        crc += (uchar)byte; // Tổng đơn giản
+    }
+    crc &= 0xFF;
 
+    if (crc == 0xA5 || crc == 0xAA || crc == 0x55)
+    {
+        frame.append((char)0xA5); // Chống trùng CRC với ký tự đặc biệt
+    }
+    frame.append(crc); // Thêm CRC vào Frame
 
+    frame.append((char)0x55); // End
+    frame.append((char)0x55); // End
+
+    // **Gửi dữ liệu qua COM**
+    Serial->write(frame);
+
+    if (Serial->waitForBytesWritten(1000)) // Chờ gửi xong
+    {
+        QString sentData = frame.toHex(' ').toUpper();
+        qDebug() << "Sent Data (HEX): " << frame.toHex(' ').toUpper();
+        updateTextBrowserSent(sentData);
+    }
+    else
+    {
+        qDebug() << "Loi khi gui du lieu!";
+    }
 }
-void MainWindow::updateTextBrowser1(quint32 canId, quint8 dlc, const QByteArray &data)
+
+QByteArray MainWindow::hexStringToByteArray(const QString &hex)
+{
+    QByteArray byteArray;
+    QStringList hexList = hex.split(' ', Qt::SkipEmptyParts); // Tách từng byte
+    for (const QString &byte : hexList)
+    {
+        bool ok;
+        byteArray.append(static_cast<char>(byte.toInt(&ok, 16))); // Chuyển từ HEX sang Byte
+        if (!ok)
+        {
+            qDebug() << "Loi chuyen đoi du lieu HEX!";
+            return QByteArray(); // Trả về rỗng nếu có lỗi
+        }
+    }
+    return byteArray;
+}
+
+void MainWindow::updateTextBrowserSent(const QString &data)
 {
     QString displayText = ui->textBrowser_sent->toPlainText();
-
-    // Chuyển đổi dữ liệu sang chuỗi HEX
-    QString canIdStr = QString("%1").arg(canId, 8, 16, QChar('0')).toUpper(); // ID 8 ký tự HEX
-    QString dlcStr = QString::number(dlc);
-    QString dataStr = data.toHex(' ').toUpper();
-
-    // Thêm vào textBrowser_sent
-    displayText.append("ID: " + canIdStr + " | DLC: " + dlcStr + " | DATA: " + dataStr + " | " +
-    QTime::currentTime().toString("hh:mm:ss") + "\n");
-
+    displayText.append(data + "  |  " + QTime::currentTime().toString("hh:mm:ss") + "\n");
     ui->textBrowser_sent->setPlainText(displayText);
 
-    // Tự động cuộn xuống cuối
+    // **Tự động cuộn xuống cuối**
     QTextCursor cursor = ui->textBrowser_sent->textCursor();
     cursor.movePosition(QTextCursor::End);
     ui->textBrowser_sent->setTextCursor(cursor);
 }
 
-// void MainWindow::sendCanData(const QByteArray &data)
-// {
-//     if (Serial->isOpen()) {
-//         // Gửi trực tiếp dữ liệu 8 byte
-//         Serial->write(data);
-//         qDebug() << "Sent Data: " << data.toHex(' ').toUpper();
-//     } else {
-//         QMessageBox::warning(this, "Serial Port", "Serial port is not open!");
-//     }
-// }
 
-// void MainWindow::on_pushButton_SEND_clicked()
-// {
-//     // Dữ liệu nhập vào là một chuỗi hex từ một QLineEdit
-//     QString hexData = ui->lineEdit_Data->text().trimmed();
+void MainWindow::parseCanData(const QByteArray &data) {
+    if (data.size() < 20) { // Kiểm tra độ dài hợp lệ
+        qDebug() << "Dữ liệu nhận được không hợp lệ!";
+        return;
+    }
 
-//     if (hexData.isEmpty())
-//     {
-//         QMessageBox::warning(this, "Input Error", "Please enter data to send!");
-//         return;
-//     }
+    // Bỏ qua 2 byte đầu (AA AA)
+    int index = (uchar)data[3] << 8 | (uchar)data[2]; // ID (Little Endian)
+    int subindex = (uchar)data[5] << 8 | (uchar)data[4]; // Subindex (Byte thứ 6)
 
-//     // Chuyển chuỗi hex thành QByteArray cho phần data
-//     QByteArray dataField = QByteArray::fromHex(hexData.toUtf8());
+    // Lấy dữ liệu 8 byte tiếp theo
+    QByteArray valueData = data.mid(6, 8);
+    QString dataHex = valueData.toHex(' ').toUpper(); // Chuyển thành chuỗi HEX
 
-//     // Kiểm tra độ dài dữ liệu (8 byte)
-//     if (dataField.size() != 8)
-//     {
-//         QMessageBox::warning(this, "Input Error", "Data field must be exactly 8 bytes in HEX format!");
-//         return;
-//     }
+    // Chuyển dữ liệu sang số nguyên (Big Endian)
+    qint64 valueDecimal = 0;
+    for (int i = 0; i < 4; i++) {
+        valueDecimal = (valueDecimal << 8) | (uchar)valueData[i];
+    }
 
-//     // Gửi dữ liệu 8 byte trực tiếp
-//     sendCanData(dataField);
-// }
+    // Cập nhật vào bảng QTableWidget
+    updateTableValue(index, subindex, dataHex);
+    updateTableValue1(index, subindex, dataHex, QString::number(valueDecimal));
+}
 
+void MainWindow::updateTableValue(int index, int subindex, const QString &dataHex) {
+    int rowCount = ui->tableWidget->rowCount();
 
-// // Hàm tính CRC (giống như trong phần trước)
-// quint8 calculateCRC(const QByteArray &data) {
-//     quint8 crc = 0;
-//     for (int i = 0; i < data.size(); i++) {
-//         crc += data[i];
-//     }
-//     return crc;
-// }
+    for (int row = 0; row < rowCount; row++) {
+        if (ui->tableWidget->item(row, 0) && ui->tableWidget->item(row, 1)) {
+            int existingIndex = ui->tableWidget->item(row, 0)->text().toInt(nullptr, 16);
+            int existingSubindex = ui->tableWidget->item(row, 1)->text().toInt(nullptr, 16);
 
-// // Hàm xây dựng khung CAN
-// QByteArray buildCanFrame(quint32 id, const QByteArray &data, bool isCanMessage = true) {
-//     QByteArray frame;
+            if (existingIndex == index && existingSubindex == subindex) {
+                ui->tableWidget->setItem(row, 3, new QTableWidgetItem(dataHex)); // Cập nhật ô "Value"
+                return;
+            }
+        }
+    }
 
-//     // 1. Start mark (2 byte 0xAA)
-//     frame.append((char)0xAA);
-//     frame.append((char)0xAA);
+    qDebug() << "Không tìm thấy ID" << QString::number(index, 16).toUpper()
+             << "Subindex" << QString::number(subindex, 16).toUpper();
+}
 
-//     // 2. CAN ID (4 byte)
-//     frame.append((char)((id >> 24) & 0xFF));
-//     frame.append((char)((id >> 16) & 0xFF));
-//     frame.append((char)((id >> 8) & 0xFF));
-//     frame.append((char)(id & 0xFF));
-
-//     // 3. Data (8 byte)
-//     QByteArray dataToSend = data;
-//     for (int i = 0; i < dataToSend.size(); i++) {
-//         frame.append(dataToSend[i]);
-//     }
-
-//     // 4. DLC (1 byte, giả sử 8 byte cho dữ liệu)
-//     frame.append((char)8);
-
-//     // 5. Message Type (00: CAN)
-//     frame.append((char)(isCanMessage ? 0x00 : 0xFF));
-
-//     // 6. IDE Flag (1 byte)
-//     frame.append((char)0x00);
-
-//     // 7. Request Flag (1 byte)
-//     frame.append((char)0x00);
-
-//     // 8. CRC (1 byte)
-//     quint8 crc = calculateCRC(frame);
-//     frame.append((char)crc);
-
-//     // 9. End mark (2 byte 0xFF)
-//     frame.append((char)0xFF);
-//     frame.append((char)0xFF);
-
-//     return frame;
-// }
-
-// // Hàm gửi khung CAN qua cổng serial
-// void sendCanFrame(QSerialPort *Serial, const QByteArray &frame) {
-//     if (Serial && Serial->isOpen()) {
-//         Serial->write(frame);
-//         qDebug() << "CAN frame sent: " << frame.toHex();
-//     } else {
-//         qDebug() << "Serial port is not open!";
-//     }
-// }
-
-// void MainWindow::on_pushButton_SEND_clicked()
-
-//     {
-//     QString inputData = ui->lineEdit_Data->text();  // Lấy dữ liệu từ QLineEdit
-
-//     if (inputData.isEmpty()) {
-//         QMessageBox::warning(this, "Input Error", "Please enter data to send!");
-//         return;
-//     }
-
-//     // Chuyển đổi dữ liệu từ chuỗi nhập vào thành QByteArray (dữ liệu phải là chuỗi hex)
-//     QByteArray data = QByteArray::fromHex(inputData.toUtf8());
-
-//     // Giả sử ID CAN là 0x123
-//     QByteArray canFrame = buildCanFrame(0x123, data);
-
-//     // Gửi dữ liệu qua cổng serial
-//     sendCanFrame(Serial, canFrame);
-
-//     }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Lưu trữ vị trí của từng index, subindex
+QMap<QPair<int, int>, int> rowMap;
+
+void MainWindow::updateTableValue1(int index, int subindex, const QString &dataHex, const QString &valueDecimal) {
+    QPair<int, int> key = qMakePair(index, subindex);
+
+    // Kiểm tra nếu ID đã tồn tại trong bảng
+    if (rowMap.contains(key)) {
+        int row = rowMap[key];
+        ui->tableWidget_2->setItem(row, 2, new QTableWidgetItem(dataHex));   // Cập nhật cột "Data" (cột 2)
+        ui->tableWidget_2->setItem(row, 3, new QTableWidgetItem(valueDecimal)); //Cập nhật cột "Value" (cột 3)
+    } else {
+        // Thêm dòng mới
+        int newRow = ui->tableWidget_2->rowCount();
+        ui->tableWidget_2->insertRow(newRow);
+
+        // Gán giá trị vào từng cột
+        ui->tableWidget_2->setItem(newRow, 0, new QTableWidgetItem(QString::number(index, 16).toUpper())); // Index
+        ui->tableWidget_2->setItem(newRow, 1, new QTableWidgetItem(QString::number(subindex, 16).toUpper())); // Subindex
+        ui->tableWidget_2->setItem(newRow, 2, new QTableWidgetItem(dataHex));  // Tạm thời để trống
+        ui->tableWidget_2->setItem(newRow, 3, new QTableWidgetItem(valueDecimal));   // Cột "Value"
+
+        // Lưu vị trí vào map để cập nhật nhanh hơn
+        rowMap[key] = newRow;
+    }
+}
 
 
-// // Hàm gửi dữ liệu CAN
-// void MainWindow::sendCanData(const QByteArray &data)
-// {
-//     if (Serial->isOpen()) {
-//         Serial->write(data);
-//         qDebug() << "Sent Data: " << data.toHex(' ').toUpper();
-//     } else {
-//         QMessageBox::warning(this, "Serial Port", "Serial port is not open!");
-//     }
-// }
 
-
-// // Nút pushButton_sendData_clicked: Gửi dữ liệu CAN từ Qt tới STM32
-//     void MainWindow::on_pushButton_SEND_clicked()
-// {
-//     // Dữ liệu nhập vào là một chuỗi hex từ  QLineEdit
-//     QString hexData = ui->lineEdit_Data->text().trimmed();
-
-//     if (hexData.isEmpty())
-//     {
-//         QMessageBox::warning(this, "Input Error", "Please enter data to send!");
-//         return;
-//     }
-
-//     // Chuyển chuỗi hex thành QByteArray cho phần data
-//     QByteArray dataField = QByteArray::fromHex(hexData.toUtf8());
-
-//     // Kiểm tra độ dài dữ liệu (8 byte)
-//     if(dataField.size() != 8)
-//     {
-//         QMessageBox::warning(this, "Input Error", "Data field must be exactly 8 bytes in HEX format!");
-//         return;
-//     }
-
-//     // Tạo frame CAN gồm:
-//     // 1. Identifier (11-bit), trong ví dụ sử dụng 0x446 (lưu vào 16 bit, giá trị cao không sử dụng)
-//     quint16 stdId = 0x103;
-//     QByteArray frame;
-//     frame.append(reinterpret_cast<const char*>(&stdId), sizeof(stdId));
-
-//     // 2. Byte chứa RTR, IDE và DLC
-//     // Bit7-4: DLC (8), bit1: IDE (0, chuẩn), bit0: RTR (0, data frame)
-//     quint8 controlByte = (8 << 4) | (0 << 1) | (0);
-//     frame.append(controlByte);
-
-//     // 3. Data field: 8 byte dữ liệu
-//     frame.append(dataField);
-
-//     // Gửi frame qua serial
-//     sendCanData(frame);
-// }
-
-// {
-//     if (Serial->isOpen()) {
-//         QMessageBox::warning(this, "Serial Port", "Please open the connection first!");
-//         return;
-//     }
-
-//     // Lấy dữ liệu từ QLineEdit (giả sử dữ liệu nhập vào là chuỗi hex)
-//     QString dataStr = ui->lineEdit_Data->text();
-//     if (dataStr.isEmpty() || dataStr.length() != 16) { // 16 ký tự hex = 8 byte
-//         QMessageBox::warning(this, "Data", "Please enter 8 bytes of data in hex format (16 characters)!");
-//         return;
-//     }
-
-//     // Chuyển đổi chuỗi hex thành QByteArray
-//     QByteArray data = QByteArray::fromHex(dataStr.toUtf8());
-
-
-//     quint16 id = 0x103; // ID 11 bit (giá trị từ 0 đến 2047)
-
-//     // Đóng gói ID vào 2 byte
-//     quint8 idByte1 = (id >> 3) & 0xFF; // 8 bit cao của ID
-//     quint8 idByte2 = (id << 5) & 0xFF; // 3 bit thấp của ID, dịch sang trái 5 bit
-
-//     // Tạo gói dữ liệu
-//     QByteArray sendData;
-//     sendData.append(reinterpret_cast<const char*>(&idByte1), 1); // Thêm byte ID đầu tiên
-//     sendData.append(reinterpret_cast<const char*>(&idByte2), 1); // Thêm byte ID thứ hai
-//     sendData.append(data); // Thêm 8 byte dữ liệu
-
-//     // In ra console để kiểm tra
-//     qDebug() << "Data to be sent (Hex):" << sendData.toHex();
-
-//     // Gửi dữ liệu qua cổng Serial
-//     qint64 bytesWritten = Serial->write(sendData);
-//     if (bytesWritten == -1) {
-//         qDebug() << "Failed to write data to serial port.";
-//         QMessageBox::warning(this, "Serial Port", "Failed to write data to serial port.");
-//         return;
-//     }
-
-//     // Đảm bảo rằng dữ liệu đã được gửi đi
-//     if (Serial->waitForBytesWritten(1000)) {
-//         qDebug() << "Data sent with ID:" << id << ", Data:" << sendData.toHex();
-//     } else {
-//         qDebug() << "Failed to send data.";
-//         QMessageBox::warning(this, "Serial Port", "Failed to send data.");
-//     }
-// }
 
 MainWindow::~MainWindow()
 {
